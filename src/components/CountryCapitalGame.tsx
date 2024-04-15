@@ -1,6 +1,6 @@
 /* eslint-disable */
-
 import { useMemo } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 type Props = {
   /**
@@ -12,33 +12,34 @@ type Props = {
 };
 
 type ButtonData = {
-  id: number;
-  paidId: number;
+  id: string;
+  pairId: string;
   label: string;
 };
 
 export default function CountryCapitalGame({ data }: Props) {
+  //!NOTE: move to "helpers" folder
+  function createButtonsPairData(labels: string[]): ButtonData[] {
+    const pairId = uuidv4();
+    const buttonsPairData = [] as ButtonData[];
+
+    for (const label of labels) {
+      buttonsPairData.push({
+        id: uuidv4(),
+        pairId,
+        label,
+      });
+    }
+
+    return buttonsPairData;
+  }
+
   const buttonsData = useMemo(() => {
-    return Object.entries(data).reduce<ButtonData[]>(
-      (acc, [countryLabel, capitalLabel]) => {
-        const countryData = {
-          id: 0,
-          paidId: 0,
-          label: countryLabel,
-        };
-
-        const capitalData = {
-          id: 0,
-          paidId: 0,
-          label: capitalLabel,
-        };
-
-        acc.push(...[countryData, capitalData]);
-
-        return acc;
-      },
-      []
-    );
+    return Object.entries(data).reduce<ButtonData[]>((acc, labels) => {
+      const d = createButtonsPairData(labels);
+      acc.push(...d);
+      return acc;
+    }, []);
   }, [data]);
 
   return (
