@@ -34,17 +34,29 @@ export default function CountryCapitalGame({ data }: Props) {
     return buttonsPairData;
   }
 
-  const buttonsData = useMemo(() => {
-    return Object.entries(data).reduce<ButtonData[]>((acc, labels) => {
+  //!NOTE: move to "utils" folder
+  function shuffleArray<T>(arr: T[]): T[] {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+
+    return arr;
+  }
+
+  const randomizedButtonsData = useMemo(() => {
+    const buttonsData = Object.entries(data).reduce<ButtonData[]>((acc, labels) => {
       const d = createButtonsPairData(labels);
       acc.push(...d);
       return acc;
     }, []);
+
+    return shuffleArray(buttonsData);
   }, [data]);
 
   return (
     <div>
-      {buttonsData.map((btn) => {
+      {randomizedButtonsData.map((btn) => {
         return <button key={btn.id}>{btn.label}</button>;
       })}
     </div>
