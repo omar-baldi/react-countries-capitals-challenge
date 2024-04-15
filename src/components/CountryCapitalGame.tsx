@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 type Props = {
@@ -18,6 +18,9 @@ type ButtonData = {
 };
 
 export default function CountryCapitalGame({ data }: Props) {
+  const [selectedButtonsIds, setSelectedButtonsIds] = useState(new Map<string, string>());
+  const [, setGuessedPairsIds] = useState<string[]>([]);
+
   //!NOTE: move to "helpers" folder
   function createButtonsPairData(labels: string[]): ButtonData[] {
     const pairId = uuidv4();
@@ -54,10 +57,51 @@ export default function CountryCapitalGame({ data }: Props) {
     return shuffleArray(buttonsData);
   }, [data]);
 
+  function handleButtonGameClick(id: string, pairId: string) {
+    setSelectedButtonsIds((prevSelectedButtonsIds) => {
+      if (prevSelectedButtonsIds.size === 1) {
+        const buttonsIds = [...prevSelectedButtonsIds.entries()];
+        const [buttonIds] = buttonsIds;
+        const [_, prevPairId] = buttonIds;
+
+        if (pairId === prevPairId) {
+          setGuessedPairsIds((prevPairsIds) => [...prevPairsIds, pairId]);
+          return new Map();
+        }
+      }
+
+      const updatedButtonsIds = new Map(prevSelectedButtonsIds);
+
+      if (updatedButtonsIds.size === 2) {
+        updatedButtonsIds.clear();
+      }
+
+      updatedButtonsIds.set(id, pairId);
+
+      return updatedButtonsIds;
+    });
+  }
+
   return (
     <div>
       {randomizedButtonsData.map((btn) => {
-        return <button key={btn.id}>{btn.label}</button>;
+        const isButtonSelected = selectedButtonsIds.has(btn.id);
+        const isButtonIncorrect = isButtonSelected && selectedButtonsIds.size === 2;
+        const buttonBackgroundColor = isButtonIncorrect
+          ? "red"
+          : isButtonSelected
+          ? "#4009FF"
+          : "initial";
+
+        return (
+          <button
+            key={btn.id}
+            style={{ backgroundColor: buttonBackgroundColor }}
+            onClick={() => handleButtonGameClick(btn.id, btn.pairId)}
+          >
+            {btn.label}
+          </button>
+        );
       })}
     </div>
   );
