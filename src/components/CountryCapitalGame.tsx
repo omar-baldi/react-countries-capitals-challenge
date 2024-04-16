@@ -1,8 +1,4 @@
-/* eslint-disable */
-import { useMemo, useState } from "react";
-import { createButtonsPairData } from "../helpers/buttons";
-import type { ButtonData } from "../types";
-import { shuffleArray } from "../utils/array";
+import { useButtonsHandler } from "../hooks/useButtonsHandler";
 
 type Props = {
   /**
@@ -14,49 +10,8 @@ type Props = {
 };
 
 export default function CountryCapitalGame({ data }: Props) {
-  const [selectedButtonsIds, setSelectedButtonsIds] = useState(new Map<string, string>());
-  const [guessedPairsIds, setGuessedPairsIds] = useState<string[]>([]);
-
-  function handleButtonGameClick(id: string, pairId: string) {
-    setSelectedButtonsIds((prevSelectedButtonsIds) => {
-      if (prevSelectedButtonsIds.size === 1) {
-        const buttonsIds = [...prevSelectedButtonsIds.entries()];
-        const [buttonIds] = buttonsIds;
-        const [_, prevPairId] = buttonIds;
-
-        if (pairId === prevPairId) {
-          setGuessedPairsIds((prevPairsIds) => [...prevPairsIds, pairId]);
-          return new Map();
-        }
-      }
-
-      const updatedButtonsIds = new Map(prevSelectedButtonsIds);
-
-      if (updatedButtonsIds.size === 2) {
-        updatedButtonsIds.clear();
-      }
-
-      updatedButtonsIds.set(id, pairId);
-
-      return updatedButtonsIds;
-    });
-  }
-
-  const randomizedButtonsData = useMemo(() => {
-    const buttonsData = Object.entries(data).reduce<ButtonData[]>((acc, labels) => {
-      const d = createButtonsPairData(labels);
-      acc.push(...d);
-      return acc;
-    }, []);
-
-    return shuffleArray(buttonsData);
-  }, [data]);
-
-  const remainingButtonsData = useMemo(() => {
-    return randomizedButtonsData.filter((btn) => !guessedPairsIds.includes(btn.pairId));
-  }, [randomizedButtonsData, guessedPairsIds]);
-
-  const isGameFinished = remainingButtonsData.length <= 0;
+  const { remainingButtons, selectedButtonsIds, isGameFinished, handleButtonClick } =
+    useButtonsHandler(data);
 
   if (isGameFinished) {
     return <h3>Congratulations!</h3>;
@@ -64,7 +19,7 @@ export default function CountryCapitalGame({ data }: Props) {
 
   return (
     <div>
-      {remainingButtonsData.map((btn) => {
+      {remainingButtons.map((btn) => {
         const isButtonSelected = selectedButtonsIds.has(btn.id);
         const isButtonIncorrect = isButtonSelected && selectedButtonsIds.size === 2;
         const buttonBackgroundColor = isButtonIncorrect
@@ -77,7 +32,7 @@ export default function CountryCapitalGame({ data }: Props) {
           <button
             key={btn.id}
             style={{ backgroundColor: buttonBackgroundColor }}
-            onClick={() => handleButtonGameClick(btn.id, btn.pairId)}
+            onClick={() => handleButtonClick(btn.id, btn.pairId)}
           >
             {btn.label}
           </button>
