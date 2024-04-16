@@ -11,6 +11,7 @@ type Props = {
   data: Record<string, string>;
 };
 
+//!NOTE: move to "types" folder
 type ButtonData = {
   id: string;
   pairId: string;
@@ -19,10 +20,11 @@ type ButtonData = {
 
 export default function CountryCapitalGame({ data }: Props) {
   const [selectedButtonsIds, setSelectedButtonsIds] = useState(new Map<string, string>());
-  const [, setGuessedPairsIds] = useState<string[]>([]);
+  const [guessedPairsIds, setGuessedPairsIds] = useState<string[]>([]);
 
   //!NOTE: move to "helpers" folder
   function createButtonsPairData(labels: string[]): ButtonData[] {
+    //!NOTE: create "utils" function to generate randomId
     const pairId = uuidv4();
     const buttonsPairData = [] as ButtonData[];
 
@@ -46,16 +48,6 @@ export default function CountryCapitalGame({ data }: Props) {
 
     return arr;
   }
-
-  const randomizedButtonsData = useMemo(() => {
-    const buttonsData = Object.entries(data).reduce<ButtonData[]>((acc, labels) => {
-      const d = createButtonsPairData(labels);
-      acc.push(...d);
-      return acc;
-    }, []);
-
-    return shuffleArray(buttonsData);
-  }, [data]);
 
   function handleButtonGameClick(id: string, pairId: string) {
     setSelectedButtonsIds((prevSelectedButtonsIds) => {
@@ -82,9 +74,29 @@ export default function CountryCapitalGame({ data }: Props) {
     });
   }
 
+  const randomizedButtonsData = useMemo(() => {
+    const buttonsData = Object.entries(data).reduce<ButtonData[]>((acc, labels) => {
+      const d = createButtonsPairData(labels);
+      acc.push(...d);
+      return acc;
+    }, []);
+
+    return shuffleArray(buttonsData);
+  }, [data]);
+
+  const remainingButtonsData = useMemo(() => {
+    return randomizedButtonsData.filter((btn) => !guessedPairsIds.includes(btn.pairId));
+  }, [randomizedButtonsData, guessedPairsIds]);
+
+  const isGameFinished = remainingButtonsData.length <= 0;
+
+  if (isGameFinished) {
+    return <h3>Congratulations!</h3>;
+  }
+
   return (
     <div>
-      {randomizedButtonsData.map((btn) => {
+      {remainingButtonsData.map((btn) => {
         const isButtonSelected = selectedButtonsIds.has(btn.id);
         const isButtonIncorrect = isButtonSelected && selectedButtonsIds.size === 2;
         const buttonBackgroundColor = isButtonIncorrect
