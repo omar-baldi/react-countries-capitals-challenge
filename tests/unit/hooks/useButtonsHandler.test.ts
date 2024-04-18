@@ -1,5 +1,5 @@
 import { useButtonsHandler } from "@/hooks/useButtonsHandler";
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, RenderHookResult } from "@testing-library/react";
 import { vi } from "vitest";
 
 vi.mock("uuid", () => {
@@ -65,5 +65,32 @@ describe("useButtonsHandler", () => {
         { id: "2_2", pairId: "2", label: "Oslo" },
       ])
     );
+  });
+
+  describe("When selecting all buttons pairs", () => {
+    let r: RenderHookResult<ReturnType<typeof useButtonsHandler>, unknown>["result"];
+
+    beforeEach(() => {
+      const { result } = renderHook(() => useButtonsHandler(mockData));
+      r = result;
+
+      act(() => {
+        r.current.handleButtonClick("1_1", "1");
+        r.current.handleButtonClick("1_2", "1");
+      });
+
+      act(() => {
+        r.current.handleButtonClick("2_1", "2");
+        r.current.handleButtonClick("2_2", "2");
+      });
+    });
+
+    it("should buttons remaining be empty", () => {
+      expect(r.current.remainingButtons).toEqual([]);
+    });
+
+    it("should game be finished", () => {
+      expect(r.current.isGameFinished).toBe(true);
+    });
   });
 });
