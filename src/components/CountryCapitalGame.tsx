@@ -31,6 +31,7 @@ export default function CountryCapitalGame({ data }: Props) {
         return (
           <button
             key={btn.id}
+            data-testid={`btn-game btn-${btn.label.toLowerCase()}`}
             style={{ backgroundColor: buttonBackgroundColor }}
             onClick={() => handleButtonClick(btn.id, btn.pairId)}
           >
