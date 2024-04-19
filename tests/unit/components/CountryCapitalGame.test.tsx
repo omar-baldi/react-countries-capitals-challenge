@@ -54,4 +54,29 @@ describe("CountryCapitalGame", () => {
     expect(buttonDenmark).toHaveStyle({ backgroundColor: "red" });
     expect(buttonRome).toHaveStyle({ backgroundColor: "red" });
   });
+
+  it("should remove selected buttons from view if pair is valid", () => {
+    const wrapper = render(
+      <CountryCapitalGame
+        data={{
+          Denmark: "Copenhagen",
+          Italy: "Rome",
+        }}
+      />
+    );
+
+    const buttonDenmark = wrapper.getByTestId("btn-denmark", { exact: false });
+    const buttonCopenhagen = wrapper.getByTestId("btn-copenhagen", { exact: false });
+
+    fireEvent.click(buttonDenmark);
+    fireEvent.click(buttonCopenhagen);
+
+    expect(
+      wrapper.queryByTestId("btn-denmark", { exact: false })
+    ).not.toBeInTheDocument();
+
+    expect(
+      wrapper.queryByTestId("btn-copenhagen", { exact: false })
+    ).not.toBeInTheDocument();
+  });
 });
