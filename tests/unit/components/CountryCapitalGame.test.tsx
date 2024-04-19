@@ -79,4 +79,29 @@ describe("CountryCapitalGame", () => {
       wrapper.queryByTestId("btn-copenhagen", { exact: false })
     ).not.toBeInTheDocument();
   });
+
+  it("should render label when there are no more buttons rendered in the view", () => {
+    const wrapper = render(
+      <CountryCapitalGame
+        data={{
+          Denmark: "Copenhagen",
+          Italy: "Rome",
+        }}
+      />
+    );
+
+    const buttonDenmark = wrapper.getByTestId("btn-denmark", { exact: false });
+    const buttonCopenhagen = wrapper.getByTestId("btn-copenhagen", { exact: false });
+    fireEvent.click(buttonDenmark);
+    fireEvent.click(buttonCopenhagen);
+
+    const buttonItaly = wrapper.getByTestId("btn-italy", { exact: false });
+    const buttonRome = wrapper.getByTestId("btn-rome", { exact: false });
+    fireEvent.click(buttonItaly);
+    fireEvent.click(buttonRome);
+
+    expect(
+      wrapper.queryAllByTestId("btn-game", { exact: false }).length
+    ).not.toBeGreaterThan(0);
+  });
 });
